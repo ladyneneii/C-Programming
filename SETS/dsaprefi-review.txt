@@ -1,0 +1,433 @@
+1. c
+2. c
+3. a
+4. 
+5. e
+6.
+7. b
+8. c
+9. d
+10. d
+11. d
+12. a
+13. c
+14. a
+15. c
+16. 
+17.
+18. b
+
+
+1.
+2. A = 13, B = 15, C = 17
+3.
+
+
+
+
+
+int isMaxHeap(int arr[])
+{
+	int pidx = 0, rcidx = 2, lcidx = 1, result = 1;
+
+	while (result == 1 && arr[lci] != -1){	
+		if (arr[pi] >= arr[lci]){
+			if (arr[rci] != -1 && arr[pi] < arr[rci]){
+				result = 0;
+			} 
+		} else {
+			result = 0;
+		}
+		pi++;
+		lci = (arr[rci] != -1) ? pi*2+1 : rci;
+		rci = lci+1;
+	}
+
+	return result;
+}
+
+
+
+int *buildHeap(int arr[])
+{
+	int total = sizeof(arr), *resArr = (int *)malloc(total);
+
+	if (resArr != NULL){
+		int pi, oldpi, lci, rci, lastndx, temp;
+
+		memcpy(resArr, arr, total);
+		lastndx = total/sizeof(int)-2;
+		pi = (lastndx-1)/2;
+		oldpi = pi;
+		while (pi > -1){
+			lci = pi*2+1;
+			rci = lci+1;
+			while (lci <= lastndx){
+				if (resArr[pi] > resArr[lci] || (rci <= lastndx && resArr[pi] > resArr[rci])){
+					if (resArr[pi] > resArr[lci]){
+						if (rci <= lastndx && resArr[lci] > resArr[rci]){
+							lci = rci;
+						}
+					} else if (rci <= lastndx && resArr[pi] > resArr[rci]){
+						lci = rci;
+					}
+					temp = resArr[pi];
+					resArr[pi] = resArr[lci];
+					resArr[lci] = temp;
+				}
+				pi = lci;
+				lci = pi*2+1;
+				rci = pi+1;
+			}
+			pi = oldpi--;
+		}
+	}
+
+	return resArr;
+}
+
+
+BST *findMemberPos(BST *B, char prod_ID[])
+{
+	while (*B != NULL && strcmp(prod_ID, (*B)->prod.prod_ID) != 0){	
+		B = (strcmp(prod_ID, (*B)->prod.prod_ID) > 0) ? &(*B)->RChild : &(*B)->LChild;
+	}
+
+	return B;
+}
+
+
+prodType deleteMinProd(BST *B)
+{
+	prodType dummy = {"XXXXX", "XXXXX", -99};
+
+	if (*B != NULL){
+		bst temp;
+
+		while ((*B)->LChild != NULL){
+			B = &(*B)->LChild;
+		}
+		temp = *B;
+		*B = (*B)->RChild;
+		temp->RChild = NULL;
+	}
+
+	return (*B != NULL) ? temp->prod : dummy;
+}
+
+
+
+
+void decreaseInventory(BST B, char prod_ID[], int qty)
+{
+	BST *result = findMemberPos(&B, prod_ID);
+	if (*result != NULL){
+		if ((*result)->prod.qty_remaining >= qty){
+			(*result)->prod.qty_remaining -= qty;
+		} else {
+			if ((*result)->LChild != NULL && (*result)->RChild != NULL){
+				prodType tempVal;
+
+				tempVal = deleteMinProd(&(*result)->RChild);
+				(*result)->prod = tempVal;
+			} else {
+				bst temp;
+
+				temp = *result;
+				*result = ((*result)->LChild == NULL) ? (*result)->RChild: (*result)->LChild;
+				free(temp);
+			}
+		} 
+	}
+}
+
+
+
+void moveNode(BST *B, char old_prod_ID[], char new_prod_ID[])
+{
+	BST *pos = findMemberPos(B, old_prod_ID)
+	prodType temp;
+
+	temp = (*pos)->prod;
+	strcpy(temp.prod_ID, new_prod_ID);
+	if ((*pos)->LChild != NULL && (*pos)->RChild){
+		prodType tempVal;
+
+		tempVal = deleteMinProd(&(*pos)->RChild);
+		(*pos)->prod = tempVal;
+	} else {
+		*pos = ((*pos)->LChild == NULL) ? &(*pos)->RChild : &(*pos)->LChild;
+	}
+	while (*B != NULL){
+			B = (strcmp(new_prod_ID, (*B)->prod.prod_ID) > 0) ? &(*B)->RChild : &(*B)->LChild;
+		}
+		*B = (BST)malloc(sizeof(nodeType));
+		if (*B != NULL){
+			(*B)->prod = temp;
+			(*B)->LChild = (*B)->RChild = NULL;
+		}
+}
+
+
+
+
+#define max 15
+
+typedef struct product {
+	char prod_ID[10];
+	char prod_name[50];
+	int qty_remaining;
+} prodType;
+
+typedef struct node {
+	prodType prod;
+	int LChild, RChild;
+} nodeType, *BST;
+
+typedef struct {
+	int avail;
+	nodeType nodes[max];
+} VSpace;
+
+
+int *findMemberPos(VSpace vs, int *head, char prod_ID[])
+{
+	while (*head != -1 && strcmp(prod_ID, vs.nodes[*head].prod.prod_ID) != 0){
+		head = (strcmp(prod_ID, vs.nodes[*head].prod.prod_ID) > 0) ? &vs.nodes[*head].RChild : &vs.nodes[*head].LChild;
+	}
+
+	return head;
+}
+
+prodType deleteMinProd(VSpace *vs, int *head)
+{
+	prodType dummy = {"XXXXX", "XXXXX", -99};
+
+	if (*head != -1){
+		int temp;
+		prodType tempProd;
+
+		for ( ; vs->nodes[*head].LChild != -1; head = &vs->nodes[*head].LChild){}
+		temp = *head;
+		*head = vs->nodes[*head].RChild;
+		tempProd = vs->nodes[temp].prod;
+
+		vs->nodes[temp].LChild = vs->nodes[temp].RChild = vs->avail;
+		vs->avail = temp;
+	}
+
+	return (*head == -1) ? dummy : tempProd;
+}
+
+void descreaseInventory(VSpace *vs, int *head, char prod_ID[], int qty)
+{
+	int *result = findMemberPos(*vs, head, prod_ID);
+
+	if (vs->nodes[*result].prod.qty_remaining >= qty){
+		vs->nodes[*result].prod.qty_remaining -= qty;
+	} else {
+		if (vs->nodes[*result].LChild != -1 && vs->nodes[*result].RChild != -1){
+			prodType tempVal;
+
+			tempVal = deleteMinProd(vs, &vs->nodes[*result].RChild);
+			vs->nodes[*result].prod = tempVal;
+		} else {
+			int temp;
+
+			temp = *result;
+			*result = (vs->nodes[*result].LChild == -1) vs->nodes[*result].RChild : vs->nodes[*result].LChild;
+
+			vs->nodes[temp].LChild = vs->nodes[temp].RChild = vs->avail;
+			vs->avail = temp;
+		}
+	}
+}
+
+void moveNode(VSpace *vs, int *head, char old_prod_ID[], new char new_prod_ID[])
+{
+	int *pos = findMemberPos(*vs, head, old_prod_ID);
+	prodType tempVal = vs->nodes[*pos].prod;
+	
+	strcpy(tempVal.prod_ID, new_prod_ID);
+	if (vs->nodes[*pos].LChild != -1 && vs->nodes[*pos].RChild){
+		prodType sub;
+
+		sub = deleteMinProd(vs, &vs->nodes[*pos].RChild);
+		vs->nodes[*pos].prod = sub;
+	} else {
+		int temp
+
+		temp = *pos;
+		*pos = (vs->nodes[*pos].LChild == -1) &vs->nodes[*pos].RChild : &vs->nodes[*pos].LChild;
+
+		vs->nodes[temp].LChild = vs->nodes[temp].RChild = vs->avail;
+		vs->avail = temp;
+	}
+	while (*head != -1){
+		head = (strcmp(new_prod_ID, vs->nodes[*head].prod.prod_ID) > 0) ? &vs->nodes[*head].RChild : &vs->nodes[*head].LChild;
+	}
+	*head = vs->avail;
+	vs->avail = vs->nodes[*head].LChild;
+
+	vs->nodes[*head].prod = tempVal;
+	vs->nodes[*head].LChild = vs->nodes[*head].RChild = -1;
+}
+
+
+
+#include <stdio.h>
+#define wordSize 15
+#define heapSize 20
+
+typedef char word[wordSize];
+typedef word heap[heapSize];
+
+int main()
+{
+	heap H;
+
+}
+
+#define max 20
+
+typedef struct {	
+	int count;
+	int elem[max];
+} Heap;
+
+void init(Heap *H)
+{
+	H->count = 0;
+}
+
+void insert(Heap *H, int num)
+{
+	if (H->count < max){
+		int ci = H->count, pi, temp;
+
+		H->elem[ci] = num;
+		for (pi = (ci-1)/2; pi > -1; ci = pi, pi = (ci-1)/2){
+			if (H->elem[ci] > H->elem[pi]){
+				temp = H->elem[ci];
+				H->elem[ci] = H->elem[pi];
+				H->elem[pi] = temp;
+			}
+		}
+		H->count++;
+	}
+}
+
+int deleteMax(Heap *H)
+{
+	if (H->count != 0){
+		int temp, pi, lci, rci, largest = H->elem[0];
+
+		H->count--;
+		temp = H->elem[H->count];
+		H->elem[H->count] = largest;
+		largest = temp;
+		pi = 0;
+		lci = 1;
+		rci = 2;
+		while (lci < H->count){
+			if (H->elem[pi] < H->elem[lci] || (rci < H->count && H->elem[pi] < H->elem[rci])){
+				if (H->elem[pi] < H->elem[lci]){
+					if (rci < H->count && H->elem[lci] < H->elem[rci]){
+						lci = rci;
+					}
+				} else if (rci < H->count && H->elem[pi] < H->elem[rci]){
+					lci = rci;
+				}
+				temp = H->elem[pi];
+				H->elem[pi] = H->elem[lci];
+				H->elem[lci] = temp;
+			}
+			pi = lci;
+			lci = pi*2+1;
+			rci = lci+1;
+		}
+	}
+
+	return (H->count != 0) ? largest : -1;
+}
+
+void heapify(Heap *H)
+{
+	if (H->count != 0){
+		int pi, lci, rci, temp, oldpi;
+
+		pi = (H->count-2)/2;
+		oldpi = pi;
+		while (pi > -1){
+			lci = pi*2+1;
+			rci = lci+1;
+			while (lci < H->count){
+				if (H->elem[pi] < H->elem[lci] || (rci < H->count && H->elem[pi] < H->elem[rci])){
+					if (H->elem[pi] < H->elem[lci]){
+						if (rci < H->count && H->elem[lci] < H->elem[rci]){
+							lci = rci;
+						}
+					} else if (rci < H->count && H->elem[pi] < H->elem[rci]){
+						lci = rci;
+					}
+					temp = H->elem[pi];
+					H->elem[pi] = H->elem[lci];
+					H->elem[lci] = temp;
+				}
+				pi = lci;
+				lci = pi*2+1;
+				rci = lci+1;
+			}
+			pi = --oldpi;
+		}
+	}
+}
+
+
+
+void insertRec(bst *, int num)
+{
+	if (*head != NULL){
+		if (num > (*head)->elem){
+			insertRec(&(*head)->rc);
+		} else {
+			insertRec(&(*head)->lc);
+		}
+	} else {
+		*head = (bst)malloc(sizeof(tree));
+
+		if (*head != NULL){
+			(*head)->elem = num;
+			(*head)->lc = (*head)->rc = NULL;
+		}
+	}
+}
+
+int deleteOneChildRec(bst *head, int num)
+{
+	int result;
+
+	if ((*head)->elem == num){
+		int temp;
+
+		temp = *head;
+		result = temp->elem;
+		*head = ((*head)->lc == NULL) ? (*head)->rc : (*head)->lc;
+		free (temp);
+	} else if ((*head)->elem < num){
+		result = deleteOneChildRec(&(*head)->rc, num);
+	} else if ((*head)->elem > num){
+		result = deleteOneChildRec(&(*head)->lc, num);
+	} else {
+		result = -99;
+	}
+	
+	return result;
+}
+
+
+
+
+
+
+

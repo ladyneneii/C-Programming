@@ -1,0 +1,131 @@
+#include <stdio.h>
+#define MAX 15
+
+typedef struct {
+	int elem[MAX];
+	int lastndx, oldLast;
+} Heap;
+
+void initialise(Heap *hptr);
+void insert(Heap *hptr, int num);
+void deletemin(Heap *hptr);
+void display(Heap h);
+void heapify(Heap *hptr);
+
+int main()
+{
+	Heap h;
+
+	initialise(&h);
+	insert(&h, 2);
+	insert(&h, 3);
+	insert(&h, 6);
+	insert(&h, 7);
+	insert(&h, 0);
+	insert(&h, 4);
+    	insert(&h, 1);
+	display(h);
+	printf("\n\n");
+	deletemin(&h);
+	deletemin(&h);
+	deletemin(&h);
+	deletemin(&h);
+	deletemin(&h);
+	deletemin(&h);
+	deletemin(&h);
+	display(h);
+	printf("\n\n");
+
+	Heap h2 = {
+		{2, 3, 6, 7, 0, 4, 1},
+		6,
+     		6
+	};
+
+	display(h2);
+	heapify(&h2);
+	printf("\n\n");
+	display(h2);
+
+	return 0;
+}
+
+void initialise(Heap *hptr)
+{
+	hptr->lastndx = -1;
+}
+
+
+void insert(Heap *hptr, int num)
+{
+	int ci, pi, temp;
+
+	hptr->lastndx++;
+	hptr->oldLast = hptr->lastndx;
+	hptr->elem[hptr->lastndx] = num;
+	for (ci = hptr->lastndx, pi = (ci-1)/2; ci != 0 && hptr->elem[ci] < hptr->elem[pi]; ci = pi, pi = (ci-1)/2){
+		temp = hptr->elem[ci];
+		hptr->elem[ci] = hptr->elem[pi];
+		hptr->elem[pi] = temp;
+	}
+}
+
+void deletemin(Heap *hptr)
+{
+	int temp, pi, lci, rci;
+
+	if (hptr->lastndx != -1){ // check if queue is empty
+		// swap
+		temp = hptr->elem[hptr->lastndx];
+		hptr->elem[hptr->lastndx] = hptr->elem[0];
+		hptr->elem[0] = temp;
+		hptr->lastndx--;
+		// for loop condition checks if the index of left child surpasses the last index, and if it doesn't, it also checks whether left child is lower than the parent
+		for (pi = 0, lci = 1, rci = 2; lci <= hptr->lastndx && hptr->elem[lci] < hptr->elem[pi]; pi = lci, lci = pi*2+1, rci = lci+1){
+			if (rci <= hptr->lastndx && hptr->elem[lci] > hptr->elem[rci]){ // checks whether right child index surpasses the last index, and if it doesn't, the condition determines which child is smaller
+				lci = rci;
+			}
+			temp = hptr->elem[lci];
+			hptr->elem[lci] = hptr->elem[pi];
+			hptr->elem[pi] = temp;
+		}
+	}
+}
+
+void display(Heap h)
+{
+	int idx;
+
+	for (idx = 0; idx <= h.oldLast; idx++){
+		printf("%d ", h.elem[idx]);
+	}
+}
+
+void heapify(Heap *hptr)
+{
+	int pi, lci, rci, temp;
+
+	for (pi = (hptr->lastndx-1)/2, lci = pi*2+1, rci = lci+1; pi > -1; pi--, lci = pi*2+1, rci = lci+1){
+		if (hptr->elem[pi] > hptr->elem[lci] || hptr->elem[pi] > hptr->elem[rci]){
+			if (hptr->elem[lci] > hptr->elem[rci]){
+				lci = rci;
+			}
+			temp = hptr->elem[lci];
+			hptr->elem[lci] = hptr->elem[pi];
+			hptr->elem[pi] = temp;
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

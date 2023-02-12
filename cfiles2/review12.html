@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<style>
+    .collapsible3 {
+    background-color: #FF5757;
+    color: white;
+    cursor: pointer;
+    padding: 18px;
+    width: 50%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 20px;
+    }
+
+    .active, .collapsible3:hover {
+    background-color: #FF6868;
+    }
+
+    .collapsible3:after {
+    content: '\002B';
+    color: white;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+    }
+
+    .active:after {
+    content: "\2212";
+    }
+
+    .content3 {
+    padding: 0 18px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out;
+    background-color: #ffffff;
+    }
+</style>
+
+    <script>
+    var coll = document.getElementsByClassName("collapsible3");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight){
+        content.style.maxHeight = null;
+        } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        } 
+    });
+    }
+    </script>
+</head>
+<body>
+    <button class="collapsible3">Requirements:</button>
+<div class="content3">
+	<p> </p>
+  	<p style="font-size: 16px; text-indent: 20px;"> ✔ Provide me a 1,000-word article </p>
+	<p style="font-size: 16px; text-indent: 20px;"> ✔ 4 1920x1080 images (1 featured image)</p>
+	<p style="font-size: 16px; text-indent: 20px;"> ✔ Place everything in a Google Drive folder and share it with me</p>
+	<p style="font-size: 16px; text-indent: 20px;"> ✔ Anchor text</p>
+	<p> </p>
+	<p style="font-size: 16px;">EYES HERE: Your website needs a well-written blog post or article page that can be used as a source for the submission to be accepted. Any link going to a commercial page will not carry a DO-Follow tag and will likely be removed once the article is published.</p>
+</div>
+    
+</body>
+</html>

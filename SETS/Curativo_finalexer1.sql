@@ -1,0 +1,54 @@
+1.
+
+SELECT Lname 
+FROM EMPLOYEE
+WHERE SSN IN (
+    SELECT SSN 
+    FROM WORKS_ON
+    WHERE PNo = (SELECT PNo
+        FROM PROJECT
+        WHERE PName = 'X' or PName = 'Y' or PName = 'Z'));
+
+2.
+
+SELECT AVG(Hours) AS "Average Hours"
+FROM WORKS_ON
+WHERE PNo IN (
+    SELECT PNo
+    FROM PROJECT
+    WHERE PName = 'Y');
+GROUP BY Hours;
+
+3.
+
+SELECT salary 
+FROM EMPLOYEE
+WHERE salary = 5 AND SSN IN (
+    SELECT SSN 
+    FROM WORKS_ON
+    WHERE PNo = (SELECT PNo
+        FROM PROJECT
+        WHERE PName = 'Z'));
+
+4.
+
+SELECT PName 
+FROM PROJECT
+
+SELECT COUNT(PNo)
+FROM WORKS_ON
+
+GROUP BY PNo
+
+5.
+
+SELECT Dname 
+FROM DEPARTMENT
+WHERE DNo IN (
+    SELECT DNo
+    FROM EMPLOYEE 
+    WHERE SSN = (SELECT SSN
+        FROM WORKS_ON
+        WHERE Hours > 45));
+
+
